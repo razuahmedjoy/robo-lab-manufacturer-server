@@ -153,6 +153,23 @@ const connectDB = async () => {
             const user = await usersCollection.findOne(filter);
             res.send(user);
         })
+
+        // update profile
+        app.put('/updateprofile/:email', verifyToken, async (req, res) => {
+            const profile = req.body;
+            const email = req.params.email;
+            const filter = {email:email};
+
+            const options ={
+                upsert: true,
+            }
+            const updateDoc = {
+                $set:profile,
+            }
+
+            const result = await usersCollection.updateOne(filter,updateDoc,options);
+            res.send({result})
+        })
        
 
     }
