@@ -138,10 +138,20 @@ const connectDB = async () => {
 
         // get all reviews
         app.get('/reviews', async (req, res) => {
-            
+
             const reviews = await reviewsCollection.find({}).toArray();
             res.send(reviews);
 
+        })
+
+        // get single user details
+        app.get('/profile/:email', verifyToken, async (req, res) => {
+            const email = req.params.email;
+            const filter = {
+                email:email
+            }
+            const user = await usersCollection.findOne(filter);
+            res.send(user);
         })
        
 
