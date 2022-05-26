@@ -97,7 +97,7 @@ const connectDB = async () => {
         
         // get all tools
         app.get('/tools', async (req, res) => {
-            const tools = await toolsCollection.find({}).toArray();
+            const tools = await toolsCollection.find({}).sort({_id:-1}).toArray();
             res.send(tools);
         })
 
@@ -109,6 +109,14 @@ const connectDB = async () => {
             }
             const tool = await toolsCollection.findOne(filter);
             res.send(tool)
+        })
+
+        // add new tools
+
+        app.post('/addtool', verifyToken, verifyAdmin, async (req, res) => {
+            const tool = req.body;
+            const result = await toolsCollection.insertOne(tool);
+            res.send(result);
         })
 
 
@@ -225,6 +233,9 @@ const connectDB = async () => {
             res.send(result);
 
         })
+
+
+
        
 
     }
