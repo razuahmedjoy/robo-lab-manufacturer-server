@@ -132,7 +132,7 @@ const connectDB = async () => {
 
         // get all orders from admin
 
-        app.get('/all-orders', verifyToken,verifyAdmin, async (req, res) => {
+        app.get('/allorders', verifyToken,verifyAdmin, async (req, res) => {
 
                 const filter = {}
                 const orders = await ordersCollection.find(filter).toArray();
@@ -166,6 +166,25 @@ const connectDB = async () => {
                 res.send({error:true})
                 
             }
+        })
+
+        // update an order statuses
+        app.put('/order/update/:id',verifyToken, async (req, res) => {
+            const id = req.params.id;
+            const status = req.body.status;
+            
+            const filter = {
+                _id:ObjectId(id)
+            }
+            
+            const updateDoc = {
+                $set:{
+                    status:status
+                }
+            }
+
+            const result = await ordersCollection.updateOne(filter,updateDoc);
+            res.send(result);
         })
 
         // add review
