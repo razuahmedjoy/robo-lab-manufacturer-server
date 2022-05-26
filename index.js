@@ -151,6 +151,7 @@ const connectDB = async () => {
                 email:email
             }
             const user = await usersCollection.findOne(filter);
+            
             res.send(user);
         })
 
