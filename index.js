@@ -48,6 +48,28 @@ const connectDB = async () => {
         const usersCollection = client.db("robolab").collection("users");
         const reviewsCollection = client.db("robolab").collection("reviews");
 
+        
+        // middleware
+        // verifyADmin
+
+        const verifyAdmin = async (req, res, next) => {
+
+            const requester = req.decoded.email;
+
+            const requesterUser = await usersCollection.findOne({ email: requester });
+
+            if (requesterUser.role === 'admin') {
+                next()
+            }
+            else {
+                res.status(403).send({ message: "Forbidden Access VerifyADmin" })
+            }
+        }
+
+
+
+
+
 
         // asign token and send
 
@@ -94,9 +116,19 @@ const connectDB = async () => {
         // place order
         app.post('/order', verifyToken, async (req, res) => {
             const order = req.body;
-            console.log(order)
+         
             const result = await ordersCollection.insertOne(order);
             res.send(result)
+        })
+
+
+        // get all orders from admin
+
+        app.get('/all-orders', verifyToken,verifyAdmin, async (req, res) => {
+
+                const filter = {}
+                const orders = await ordersCollection.find(filter).toArray();
+                res.send(orders)
         })
 
         // get orders filter by user
@@ -151,7 +183,7 @@ const connectDB = async () => {
                 email:email
             }
             const user = await usersCollection.findOne(filter);
-            
+
             res.send(user);
         })
 
