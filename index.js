@@ -28,6 +28,32 @@ const connectDB = async () => {
         await client.connect();
         const toolsCollection = client.db("robolab").collection("tools");
         const ordersCollection = client.db("robolab").collection("orders");
+        const usersCollection = client.db("robolab").collection("users");
+
+
+        // asign token and send
+
+        app.put("/updateuser",async (req, res)=>{
+            const user = req.body;
+            const email = user.email
+            const filter = {email:email}
+            
+            const options = {
+                upsert:true,
+            }
+
+            const updateDoc = {
+                $set:user,
+            }
+
+            const result = await usersCollection.updateOne(filter, updateDoc,options)
+
+            // create token for this user
+            const token = jwt.sign({email},process.env.ACCESS_TOKEN_SECRET,{expiresIn:'1d'})
+
+            res.send({result,token:token})
+           
+        })
         
         // get all tools
         app.get('/tools', async (req, res) => {
