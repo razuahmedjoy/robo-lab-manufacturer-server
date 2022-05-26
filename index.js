@@ -111,6 +111,15 @@ const connectDB = async () => {
             res.send(tool)
         })
 
+        app.delete('/tool/:id',verifyToken,verifyAdmin, async (req, res)=>{
+            const id = req.params.id;
+            const filter= {
+                _id:ObjectId(id)
+            }
+            const result = await toolsCollection.deleteOne(filter);
+            res.send(result);
+        })
+
         // add new tools
 
         app.post('/addtool', verifyToken, verifyAdmin, async (req, res) => {
