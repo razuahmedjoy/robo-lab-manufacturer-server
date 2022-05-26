@@ -176,6 +176,13 @@ const connectDB = async () => {
 
         })
 
+
+        // get all users
+        app.get('/allusers',verifyToken,verifyAdmin,async (req, res) => {
+            const users = await usersCollection.find({}).toArray();
+            res.send(users)
+
+        })
         // get single user details
         app.get('/profile/:email', verifyToken, async (req, res) => {
             const email = req.params.email;
