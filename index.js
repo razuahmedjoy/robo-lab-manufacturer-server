@@ -12,6 +12,23 @@ app.use(express.json());
 
 
 
+const verifyToken = (req, res, next) => {
+    const authorization = req.headers.authorization
+    if(authorization){
+        const accessToken = authorization.split(" ")[1];
+
+        jwt.verify(accessToken,process.env.ACCESS_TOKEN_SECRET,(err,decoded)=>{
+            if(err){
+                return res.status(403).send({message:"Forbidden Access from verifyToken"})
+            }
+            req.decoded = decoded;
+            next();
+        })
+    }else{
+        return res.status(401).send({message:"Unauthorised"})
+    }
+}
+
 // DB CONNECTION
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
@@ -29,6 +46,7 @@ const connectDB = async () => {
         const toolsCollection = client.db("robolab").collection("tools");
         const ordersCollection = client.db("robolab").collection("orders");
         const usersCollection = client.db("robolab").collection("users");
+        const reviewsCollection = client.db("robolab").collection("reviews");
 
 
         // asign token and send
@@ -74,12 +92,57 @@ const connectDB = async () => {
 
 
         // place order
-        app.post('/order', async (req, res) => {
+        app.post('/order', verifyToken, async (req, res) => {
             const order = req.body;
+            console.log(order)
             const result = await ordersCollection.insertOne(order);
             res.send(result)
         })
 
+        // get orders filter by user
+        app.get('/my-orders/:email', verifyToken, async (req, res) => {
+            const email = req.params.email;
+            const filter = {
+                user:email
+            }
+            const orders = await ordersCollection.find(filter).toArray();
+            res.send(orders);
+
+        })
+
+        // delete an order
+        app.delete('/order/:id', verifyToken, async (req, res) => {
+            const id = req.params.id;
+            const filter = {
+                _id:ObjectId(id)
+            }
+            try{
+
+                const result = await ordersCollection.deleteOne(filter);
+                res.send(result);
+
+            }
+            catch(err) {
+                res.send({error:true})
+                
+            }
+        })
+
+        // add review
+
+        app.post('/review',verifyToken, async (req, res) => {
+            const  review = req.body;
+            const result = await reviewsCollection.insertOne(review);
+            res.send(result)
+        })
+
+        // get all reviews
+        app.get('/reviews', async (req, res) => {
+            
+            const reviews = await reviewsCollection.find({}).toArray();
+            res.send(reviews);
+
+        })
        
 
     }
