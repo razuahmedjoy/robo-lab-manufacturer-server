@@ -210,6 +210,21 @@ const connectDB = async () => {
             const result = await usersCollection.updateOne(filter,updateDoc,options);
             res.send({result})
         })
+
+        // make admin user
+        app.put('/makeadmin/:email',verifyToken,verifyAdmin,async (req, res) => {
+            
+            const email = req.params.email;
+            const filter = {email:email}
+            const updateDoc = {
+                $set: {
+                    role: 'admin',
+                },
+            };
+            const result = await usersCollection.updateOne(filter, updateDoc);
+            res.send(result);
+
+        })
        
 
     }
